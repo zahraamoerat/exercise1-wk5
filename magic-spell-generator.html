@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Magical Spell Generator</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Georgia', serif;
+      background: linear-gradient(135deg, #ffe6f0 0%, #ffd6e8 50%, #ffc2d9 100%);
+      color: #5c1a3a;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+    }
+
+    .spellbook {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(10px);
+      border: 3px solid #ff8fc7;
+      border-radius: 25px;
+      padding: 3rem;
+      max-width: 600px;
+      width: 100%;
+      box-shadow: 0 10px 40px rgba(255, 143, 199, 0.3);
+      text-align: center;
+    }
+
+    h1 {
+      color: #d63384;
+      font-size: 2.5rem;
+      margin-bottom: 2rem;
+      font-weight: 800;
+      text-shadow: 0 2px 10px rgba(214, 51, 132, 0.2);
+    }
+
+    #spellArea {
+      background: #fff5fa;
+      border: 3px dashed #ff8fc7;
+      border-radius: 18px;
+      min-height: 150px;
+      margin: 2rem 0;
+      padding: 2rem;
+      font-size: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.5s ease;
+      color: #a61e5c;
+      font-weight: 600;
+      box-shadow: inset 0 2px 8px rgba(255, 143, 199, 0.15);
+    }
+
+    #ingredientsList {
+      list-style: none;
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin: 1.5rem 0;
+      flex-wrap: wrap;
+    }
+
+    #ingredientsList li {
+      background: #ffe6f0;
+      border: 2px solid #ffb3d9;
+      padding: 0.7rem 1.3rem;
+      border-radius: 30px;
+      font-size: 0.95rem;
+      color: #a61e5c;
+      font-weight: 600;
+      box-shadow: 0 3px 8px rgba(255, 179, 217, 0.25);
+    }
+
+    .button-group {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    button {
+      background: linear-gradient(135deg, #ff5fa2, #ff8fc7);
+      color: #fff;
+      border: 3px solid #fff;
+      padding: 1rem 2.5rem;
+      border-radius: 50px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: 'Georgia', serif;
+      box-shadow: 0 4px 15px rgba(255, 95, 162, 0.35);
+    }
+
+    button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(255, 95, 162, 0.5);
+      background: linear-gradient(135deg, #ff4d94, #ff7ab8);
+    }
+
+    button:active {
+      transform: translateY(-1px);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    #resetButton {
+      background: linear-gradient(135deg, #d63384, #e85aa0);
+      box-shadow: 0 4px 15px rgba(214, 51, 132, 0.35);
+    }
+
+    #resetButton:hover {
+      background: linear-gradient(135deg, #c71f6e, #db3d8a);
+      box-shadow: 0 6px 20px rgba(214, 51, 132, 0.5);
+    }
+
+    .countdown {
+      font-size: 3.5rem;
+      color: #d63384;
+      font-weight: 800;
+      animation: pulse 1s ease-in-out;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.25); opacity: 0.8; }
+    }
+
+    .spell-text {
+      animation: fadeIn 0.6s ease;
+      font-size: 1.6rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+  <div class="spellbook">
+ 
+    <h1>Welcome to the Magical Spell Generator!</h1>
+    
+    <div id="spellArea">Cast your spell...</div>
+
+    <button id="generateButton">Generate Spell</button>
+    
+    <ul id="ingredientsList">
+      <li>Dragon Scale</li>
+      <li>Phoenix Feather</li>
+      <li>Unicorn Horn</li>
+    </ul>
+
+ 
+    <div class="button-group">
+      <button id="resetButton">Reset</button>
+    </div>
+  </div>
+
+  <script>
+    // Getting DOM elements
+    const generateButton = document.getElementById('generateButton');
+    const resetButton = document.getElementById('resetButton');
+    const spellArea = document.getElementById('spellArea');
+    const ingredientsList = document.getElementById('ingredientsList');
+    
+
+    const ingredients = Array.from(ingredientsList.children).map(li => li.textContent);
+
+    
+    const allColors = [
+      '#d4d4d4', '#aecae6', '#c8e7d6', '#d7ffaa', '#ffa6cc',
+      '#e2ffac94', '#eff8be', '#535172', '#b781ff', '#74eaff', '#74eaff', '#74eaff', '#74eaff'
+    ];
+
+  
+    generateButton.addEventListener('click', () => {
+      // Disable button during countdown
+      generateButton.disabled = true;
+      
+      let count = 3;
+
+      const countdownInterval = setInterval(() => {
+        spellArea.innerHTML = `<span class="countdown">${count}</span>`;
+        count--;
+        
+        if (count < 0) {
+          clearInterval(countdownInterval);
+          
+
+          const randomIndex = Math.floor(Math.random() * ingredients.length);
+          const selectedIngredient = ingredients[randomIndex];
+          
+   
+          const randomColor = allColors[Math.floor(Math.random() * allColors.length)];
+          spellArea.style.backgroundColor = randomColor;
+          
+
+          spellArea.innerHTML = `<span class="spell-text">${selectedIngredient} Spell Cast!</span>`;
+          
+
+          generateButton.disabled = false;
+        }
+      }, 1000);
+    });
+
+ 
+    resetButton.addEventListener('click', () => {
+      spellArea.innerHTML = 'Cast your first spell...';
+      spellArea.style.backgroundColor = '#fff5fa';
+    });
+
+
+    spellArea.style.backgroundColor = '#fff5fa';
+  </script>
+</body>
+</html>
